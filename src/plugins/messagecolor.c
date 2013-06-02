@@ -5,41 +5,32 @@
 #include "../map/pc.h"
 
 HPExport struct hplugin_info pinfo = {
-	"autonext",		// Plugin name
+	"messagecolor",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
 	"1.0",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-BUILDIN(autonext) 
+BUILDIN(messagecolor) 
 {
-	TBL_PC* sd;
-	int timeout;
+	TBL_PC *sd = script->rid2sd(st);
+	const char *message, *player;
+	int color;
 	
-	sd = script->rid2sd(st);
-	if( sd == NULL )
-		return true;
-#ifdef SECURE_NPCTIMEOUT
-	sd->npc_idle_type = NPCT_WAIT;
-#endif
-	//script_detach_rid(st);
+	player = script_getstr(st,2);
+	message = script_getstr(st,3);
 
-	timeout=script_getnum(st,2);
-
-	if(st->sleep.tick == 0)
-	{
-		st->state = RERUNLINE;
-		st->sleep.tick = timeout;
-	}
-	else
-	{// sleep time is over
-		st->state = RUN;
-		st->sleep.tick = 0;
-	}
-
-	clif->scriptnext(sd, st->oid);
+	if(script_hasdata(st,4))
+		color=script_getnum(st,4);
+	else 
+		color = COLOR_DEFAULT;
+	
+	if((sd=map_nick2sd((char *) player)) != NULL)
+		clif->colormes(sd->fd,color,message);
+	
 	return true;
 }
+
 
 /* Server Startup */
 HPExport void plugin_init (void) 
@@ -49,6 +40,6 @@ HPExport void plugin_init (void)
 
 	if( HPMi->addScript != NULL ) 
 	{
-		HPMi->addScript("autonext","i",BUILDIN_A(autonext));
+		HPMi->addScript("messagecolor","ss?",BUILDIN_A(messagecolor));
 	}
 }
