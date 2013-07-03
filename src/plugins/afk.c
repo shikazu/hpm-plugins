@@ -23,7 +23,8 @@ ACMD(afk)
     clif->specialeffect(&sd->bl, 234,AREA);
     clif->authfail_fd(fd, 15);
 
-    return 0;
+	// Thanks for poiting that out! (quesoph, ossi0110)
+    return 1;
 }
 
 /* Server Startup */
